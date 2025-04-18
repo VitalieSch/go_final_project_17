@@ -9,6 +9,6 @@ func Init() {
 
 	http.HandleFunc("/api/nextdate", database.NextDateHandler)
 	http.HandleFunc("/api/task", TaskHandler)
-	http.HandleFunc("/api/tasks", database.GetTasksHandler)
+	http.HandleFunc("/api/tasks", GetTasksHandler)
 
 }

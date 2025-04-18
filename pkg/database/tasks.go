@@ -1,10 +1,5 @@
 package database
 
-import (
-	"encoding/json"
-	"net/http"
-)
-
 // Получение списка задач
 func GetTasks() ([]Task, error) {
 
@@ -31,23 +26,4 @@ func GetTasks() ([]Task, error) {
 	}
 
 	return tasks, nil
-}
-
-// Обработчик для получения списка задач
-
-func GetTasksHandler(w http.ResponseWriter, r *http.Request) {
-
-	tasks, err := GetTasks()
-	if err != nil {
-		http.Error(w, `{"error": "ошибка при получении задач"}`, http.StatusInternalServerError)
-		return
-	}
-
-	if tasks == nil {
-		tasks = []Task{}
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string][]Task{"tasks": tasks})
-
 }
