@@ -10,7 +10,7 @@ import (
 func main() {
 	var db *sql.DB
 
-	db, err := database.Init("scheduler.db")
+	err := database.Init("scheduler.db")
 	if err != nil {
 		log.Fatalf("не удалось получить БД: %v\n", err)
 	}

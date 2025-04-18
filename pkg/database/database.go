@@ -4,22 +4,15 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 	_ "modernc.org/sqlite"
 )
 
 // Инициализация базы данных
-func Init(dbFile string) (*sql.DB, error) {
+func Init(dbFile string) error {
 
-	appPath, err := os.Executable()
-	if err != nil {
-		return nil, err
-	}
-	dbFile = filepath.Join(filepath.Dir(appPath), dbFile)
-
-	_, err = os.Stat(dbFile)
+	_, err := os.Stat(dbFile)
 	var install bool
 	if err != nil {
 		install = true
@@ -27,7 +20,7 @@ func Init(dbFile string) (*sql.DB, error) {
 
 	db, err := sql.Open("sqlite", dbFile)
 	if err != nil {
-		return nil, fmt.Errorf("не удалось открыть файл: %v", err)
+		return fmt.Errorf("не удалось открыть файл: %v", err)
 	}
 
 	if install {
@@ -46,7 +39,7 @@ func Init(dbFile string) (*sql.DB, error) {
 
 		_, err = db.Exec(schema)
 		if err != nil {
-			return nil, fmt.Errorf("не удалось создать таблицу: %v", err)
+			return fmt.Errorf("не удалось создать таблицу: %v", err)
 		}
 		fmt.Printf("Файл создан: %s\n", dbFile)
 		fmt.Println("Таблица создана")
@@ -54,5 +47,5 @@ func Init(dbFile string) (*sql.DB, error) {
 		fmt.Printf("Использован существующий файл: %s\n", dbFile)
 	}
 
-	return db, nil
+	return nil
 }
