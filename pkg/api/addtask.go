@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go1f/pkg/database"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -15,6 +16,10 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		AddTaskHandler(w, r)
+	case http.MethodGet:
+		GetTaskHandlerById(w, r)
+	case http.MethodPut:
+		PutUpdateTaskHandler(w, r)
 
 	}
 }
@@ -80,5 +85,106 @@ func AddTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, `{"id":"%d"}`, id)
+
+}
+
+// Обработчик для получения задачи методом Get по ID
+func GetTaskHandlerById(w http.ResponseWriter, r *http.Request) {
+
+	id := r.URL.Query().Get("id")
+
+	if id == "" {
+		http.Error(w, `{"error": "не указан идентификатор"}`, http.StatusBadRequest)
+		return
+	}
+
+	task, err := database.GetTaskByID(id)
+	if err != nil {
+		http.Error(w, `{"error": "ошибка при получении задачи или нет такого id"}`, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(task)
+
+}
+
+// Обработчик обновления задачи методом put
+func PutUpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
+
+	var task *database.Task
+
+	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+		http.Error(w, `{"error":"ошибка декодирования JSON"}`, http.StatusBadRequest)
+		return
+	}
+
+	now := time.Now()
+
+	if task.Date == "" {
+		task.Date = now.Format("20060102")
+	}
+
+	t, err := time.Parse("20060102", task.Date)
+	if err != nil {
+		http.Error(w, `{"error":"неверный формат двты"}`, http.StatusBadRequest)
+		return
+	}
+
+	if t.Format("20060102") == now.Format("20060102") {
+		task.Date = now.Format("20060102")
+	} else if t.Before(now) && task.Repeat == "" {
+		task.Date = now.Format("20060102")
+	} else if t.Before(now) {
+		nextDate, err := database.NextDate(now, task.Date, task.Repeat)
+		if err != nil {
+			http.Error(w, `{"error":"неверный формат двты"}`, http.StatusBadRequest)
+			return
+		}
+		task.Date = nextDate
+	} else {
+		task.Date = t.Format("20060102")
+	}
+
+	if task.Title == "" {
+		http.Error(w, `{"error":"Не указан заголовок задачи"}`, http.StatusBadRequest)
+		return
+	}
+
+	part := strings.Split(task.Repeat, " ")
+
+	if part[0] != "y" {
+		if part[0] != "d" {
+			if part[0] != "" {
+				http.Error(w, `{"error":"неверный формат периодичности задачи"}`, http.StatusBadRequest)
+				return
+			}
+		}
+	}
+
+	if task.ID == "" {
+		http.Error(w, `{"error": "не указан идентификатор"}`, http.StatusBadRequest)
+		return
+	}
+	l, err := strconv.ParseInt(task.ID, 10, 64)
+	if err != nil {
+		http.Error(w, `{"error": "не корректный идентификатор"}`, http.StatusBadRequest)
+		return
+	} else {
+		n, err := database.MaxId()
+		if err != nil {
+			http.Error(w, `{"error": "не корректный идентификатор"}`, http.StatusBadRequest)
+			return
+		}
+		if l > n {
+			http.Error(w, `{"error": "не корректный идентификатор"}`, http.StatusBadRequest)
+			return
+		}
+
+	}
+
+	database.UpdateTask(task)
+
+	json.NewEncoder(w).Encode(struct{}{})
 
 }
