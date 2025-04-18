@@ -25,7 +25,7 @@ func Init(dbFile string) (*sql.DB, error) {
 		install = true
 	}
 
-	db, err := sql.Open("sqlite3", dbFile)
+	db, err := sql.Open("sqlite", dbFile)
 	if err != nil {
 		return nil, fmt.Errorf("не удалось открыть файл: %v", err)
 	}
