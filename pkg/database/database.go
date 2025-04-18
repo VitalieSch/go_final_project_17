@@ -9,6 +9,8 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+var database *sql.DB
+
 // Инициализация базы данных
 func Init(dbFile string) error {
 
@@ -22,6 +24,7 @@ func Init(dbFile string) error {
 	if err != nil {
 		return fmt.Errorf("не удалось открыть файл: %v", err)
 	}
+	database = db
 
 	if install {
 		//Создаем таблицу,если ее нет
