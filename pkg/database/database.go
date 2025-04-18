@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 	_ "modernc.org/sqlite"
@@ -12,7 +13,13 @@ import (
 // Инициализация базы данных
 func Init(dbFile string) error {
 
-	_, err := os.Stat(dbFile)
+	appPath, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	dbFile = filepath.Join(filepath.Dir(appPath), dbFile)
+
+	_, err = os.Stat(dbFile)
 	var install bool
 	if err != nil {
 		install = true
