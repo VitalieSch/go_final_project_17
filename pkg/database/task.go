@@ -62,14 +62,14 @@ func UpdateTask(task *Task) error {
 
 //Функция определения max id в таблице scheduler
 
-func MaxId() (int64, error) {
-	var n int64
-	row := database.QueryRow(`SELECT max(id) FROM scheduler`)
-	err := row.Scan(&n)
+func LastId() int {
+	var lastId int
+	err := database.QueryRow("SELECT max(id) FROM scheduler").Scan(&lastId)
+
 	if err != nil {
 		panic(err)
 	}
-	return n, nil
+	return lastId
 }
 
 // Функция удаления задания из БД по ID
@@ -87,8 +87,6 @@ func DeleteTaskById(id string) error {
 
 // Функция обновления даты задания
 func UpdateDate(task *Task) error {
-
-	var err error
 
 	res, err := database.Exec("UPDATE scheduler SET date = ? WHERE id = ?", task.Date, task.ID)
 	if err != nil {

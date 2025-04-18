@@ -120,13 +120,25 @@ func PutUpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error":"ошибка декодирования JSON"}`, http.StatusBadRequest)
 		return
 	}
+	if task.ID == "" {
+		http.Error(w, `{"error": "не указан идентификатор"}`, http.StatusBadRequest)
+		return
+	}
+	l, err := strconv.Atoi(task.ID)
+	if err != nil {
+		http.Error(w, `{"error": "ошибка обработки данных"}`, http.StatusBadRequest)
+		return
+	}
+	if l > database.LastId() {
+		http.Error(w, `{"error": "некорректный идентификатор"}`, http.StatusBadRequest)
+		return
+	}
 
 	now := time.Now()
 
 	if task.Date == "" {
 		task.Date = now.Format("20060102")
 	}
-
 	t, err := time.Parse("20060102", task.Date)
 	if err != nil {
 		http.Error(w, `{"error":"неверный формат двты"}`, http.StatusBadRequest)
@@ -138,14 +150,12 @@ func PutUpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	} else if t.Before(now) && task.Repeat == "" {
 		task.Date = now.Format("20060102")
 	} else if t.Before(now) {
-		nextDate, err := database.NextDate(now, task.Date, task.Repeat)
+		task.Date, err = database.NextDate(now, task.Date, task.Repeat)
 		if err != nil {
 			http.Error(w, `{"error":"неверный формат двты"}`, http.StatusBadRequest)
 			return
 		}
-		task.Date = nextDate
-	} else {
-		task.Date = t.Format("20060102")
+
 	}
 
 	if task.Title == "" {
@@ -162,27 +172,6 @@ func PutUpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-	}
-
-	if task.ID == "" {
-		http.Error(w, `{"error": "не указан идентификатор"}`, http.StatusBadRequest)
-		return
-	}
-	l, err := strconv.ParseInt(task.ID, 10, 64)
-	if err != nil {
-		http.Error(w, `{"error": "не корректный идентификатор"}`, http.StatusBadRequest)
-		return
-	} else {
-		n, err := database.MaxId()
-		if err != nil {
-			http.Error(w, `{"error": "не корректный идентификатор"}`, http.StatusBadRequest)
-			return
-		}
-		if l > n {
-			http.Error(w, `{"error": "не корректный идентификатор"}`, http.StatusBadRequest)
-			return
-		}
-
 	}
 
 	database.UpdateTask(task)
