@@ -11,11 +11,11 @@ import (
 )
 
 // Инициализация базы данных
-func Init(dbFile string) error {
+func Init(dbFile string) (*sql.DB, error) {
 
 	appPath, err := os.Executable()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	dbFile = filepath.Join(filepath.Dir(appPath), dbFile)
 
@@ -27,7 +27,7 @@ func Init(dbFile string) error {
 
 	db, err := sql.Open("sqlite3", dbFile)
 	if err != nil {
-		return fmt.Errorf("не удалось открыть файл: %v", err)
+		return nil, fmt.Errorf("не удалось открыть файл: %v", err)
 	}
 
 	if install {
@@ -46,7 +46,7 @@ func Init(dbFile string) error {
 
 		_, err = db.Exec(schema)
 		if err != nil {
-			return fmt.Errorf("не удалось создать таблицу: %v", err)
+			return nil, fmt.Errorf("не удалось создать таблицу: %v", err)
 		}
 		fmt.Printf("Файл создан: %s\n", dbFile)
 		fmt.Println("Таблица создана")
@@ -54,5 +54,5 @@ func Init(dbFile string) error {
 		fmt.Printf("Использован существующий файл: %s\n", dbFile)
 	}
 
-	return nil
+	return db, nil
 }
