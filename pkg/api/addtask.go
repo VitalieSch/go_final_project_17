@@ -21,14 +21,14 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 
 // Обработчик для добавления задачи
 func AddTaskHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("11111=")
+
 	var task database.Task
-	fmt.Println("222222=", task)
+
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
 		http.Error(w, `{"error":"Ошибка декодирования JSON"}`, http.StatusBadRequest)
 		return
 	}
-	fmt.Println("333333=", task)
+
 	now := time.Now()
 
 	if task.Date == "" {
