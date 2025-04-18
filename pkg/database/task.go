@@ -71,3 +71,36 @@ func MaxId() (int64, error) {
 	}
 	return n, nil
 }
+
+// Функция удаления задания из БД по ID
+func DeleteTaskById(id string) error {
+
+	var err error
+
+	_, err = database.Exec("DELETE FROM scheduler WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Функция обновления даты задания
+func UpdateDate(task *Task) error {
+
+	var err error
+
+	res, err := database.Exec("UPDATE scheduler SET date = ? WHERE id = ?", task.Date, task.ID)
+	if err != nil {
+		return err
+	}
+
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return fmt.Errorf("не корректный id")
+	}
+	return nil
+}

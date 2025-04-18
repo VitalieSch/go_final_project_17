@@ -20,6 +20,8 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 		GetTaskHandlerById(w, r)
 	case http.MethodPut:
 		PutUpdateTaskHandler(w, r)
+	case http.MethodDelete:
+		DeleteTaskHandler(w, r)
 
 	}
 }
@@ -185,6 +187,28 @@ func PutUpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	database.UpdateTask(task)
 
+	json.NewEncoder(w).Encode(struct{}{})
+
+}
+
+// Обработчик удаления задания
+func DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, `{"error": "не указан идентификатор"}`, http.StatusBadRequest)
+		return
+	}
+
+	_, err := database.GetTaskByID(id)
+	if err != nil {
+		http.Error(w, `{"error":"задания по заданному id нет"}`, http.StatusInternalServerError)
+		return
+	}
+
+	database.DeleteTaskById(id)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	json.NewEncoder(w).Encode(struct{}{})
 
 }
