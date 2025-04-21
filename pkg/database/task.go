@@ -63,6 +63,7 @@ func UpdateTask(task *Task) error {
 //Функция определения max id в таблице scheduler
 
 func LastId() int {
+
 	var lastId int
 	err := database.QueryRow("SELECT max(id) FROM scheduler").Scan(&lastId)
 

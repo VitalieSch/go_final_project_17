@@ -129,6 +129,7 @@ func PutUpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error": "ошибка обработки данных"}`, http.StatusBadRequest)
 		return
 	}
+
 	if l > database.LastId() {
 		http.Error(w, `{"error": "некорректный идентификатор"}`, http.StatusBadRequest)
 		return
