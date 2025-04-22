@@ -1,16 +1,19 @@
 package database
 
+import (
+	"errors"
+)
+
+const TaskLimit = 50
+
 // Получение списка задач
 func GetTasks() ([]Task, error) {
 
-	rows, err := database.Query(`
-		SELECT id, date, title, comment, repeat
-		FROM scheduler
-		ORDER BY date
-		LIMIT 50
-	`)
+	query := "SELECT id, date, title, comment, repeat FROM scheduler	ORDER BY date LIMIT ?"
+
+	rows, err := database.Query(query, TaskLimit)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("неудалось получить данные")
 	}
 	defer rows.Close()
 
@@ -19,7 +22,7 @@ func GetTasks() ([]Task, error) {
 	for rows.Next() {
 		var task Task
 		if err := rows.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat); err != nil {
-			return nil, err
+			return nil, errors.New("неудалось получить данные")
 		}
 
 		tasks = append(tasks, task)

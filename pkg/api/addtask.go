@@ -3,12 +3,15 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"go1f/pkg/database"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"go1f/pkg/database"
 )
+
+const DateFmt = "20060102"
 
 // Выбор обработчика в зависимости от метода
 func TaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -39,19 +42,19 @@ func AddTaskHandler(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 
 	if task.Date == "" {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(DateFmt)
 	}
 
-	t, err := time.Parse("20060102", task.Date)
+	t, err := time.Parse(DateFmt, task.Date)
 	if err != nil {
 		http.Error(w, `{"error":"неверный формат двты"}`, http.StatusBadRequest)
 		return
 	}
 
-	if t.Format("20060102") == now.Format("20060102") {
-		task.Date = now.Format("20060102")
+	if t.Format("20060102") == now.Format(DateFmt) {
+		task.Date = now.Format(DateFmt)
 	} else if t.Before(now) && task.Repeat == "" {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(DateFmt)
 	} else if t.Before(now) {
 		nextDate, err := database.NextDate(now, task.Date, task.Repeat)
 		if err != nil {
@@ -60,7 +63,7 @@ func AddTaskHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		task.Date = nextDate
 	} else {
-		task.Date = t.Format("20060102")
+		task.Date = t.Format(DateFmt)
 	}
 
 	if task.Title == "" {
@@ -138,18 +141,18 @@ func PutUpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 
 	if task.Date == "" {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(DateFmt)
 	}
-	t, err := time.Parse("20060102", task.Date)
+	t, err := time.Parse(DateFmt, task.Date)
 	if err != nil {
 		http.Error(w, `{"error":"неверный формат двты"}`, http.StatusBadRequest)
 		return
 	}
 
-	if t.Format("20060102") == now.Format("20060102") {
-		task.Date = now.Format("20060102")
+	if t.Format("20060102") == now.Format(DateFmt) {
+		task.Date = now.Format(DateFmt)
 	} else if t.Before(now) && task.Repeat == "" {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(DateFmt)
 	} else if t.Before(now) {
 		task.Date, err = database.NextDate(now, task.Date, task.Repeat)
 		if err != nil {

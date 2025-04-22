@@ -1,7 +1,7 @@
 package database
 
 import (
-	"fmt"
+	"errors"
 )
 
 type Task struct {
@@ -20,7 +20,7 @@ func AddTask(task Task) (int64, error) {
 		VALUES (?, ?, ?, ?)
 	`, task.Date, task.Title, task.Comment, task.Repeat)
 	if err != nil {
-		return 0, err
+		return 0, errors.New("неудалось добавить данные")
 	}
 
 	return res.LastInsertId()
@@ -34,7 +34,7 @@ func GetTaskByID(id string) (Task, error) {
 	query := "SELECT id, date, title, comment, repeat FROM scheduler WHERE id = ?"
 	err = database.QueryRow(query, id).Scan(&t.ID, &t.Date, &t.Title, &t.Comment, &t.Repeat)
 	if err != nil {
-		return t, err
+		return t, errors.New("неудалось получить данные")
 	}
 
 	return t, nil
@@ -46,15 +46,15 @@ func UpdateTask(task *Task) error {
 
 	res, err := database.Exec("UPDATE scheduler SET date = ?, title = ?, comment = ?, repeat = ? WHERE id = ?", task.Date, task.Title, task.Comment, task.Repeat, task.ID)
 	if err != nil {
-		return err
+		return errors.New("неудалось обновить данные")
 	}
 	// метод RowsAffected() возвращает количество записей,к которым была применена SQL команда
 	count, err := res.RowsAffected()
 	if err != nil {
-		return err
+		return errors.New("неудалось обновить данные")
 	}
 	if count == 0 {
-		return fmt.Errorf(`incorrect id for updating task`)
+		return errors.New("некорректный id для обновления данных")
 	}
 
 	return nil
@@ -70,6 +70,7 @@ func LastId() int {
 	if err != nil {
 		panic(err)
 	}
+
 	return lastId
 }
 
@@ -80,7 +81,7 @@ func DeleteTaskById(id string) error {
 
 	_, err = database.Exec("DELETE FROM scheduler WHERE id = ?", id)
 	if err != nil {
-		return err
+		return errors.New("неудалось удалить задачу")
 	}
 
 	return nil
@@ -91,7 +92,7 @@ func UpdateDate(task *Task) error {
 
 	res, err := database.Exec("UPDATE scheduler SET date = ? WHERE id = ?", task.Date, task.ID)
 	if err != nil {
-		return err
+		return errors.New("неудалось обновить дату")
 	}
 
 	count, err := res.RowsAffected()
@@ -99,7 +100,7 @@ func UpdateDate(task *Task) error {
 		return err
 	}
 	if count == 0 {
-		return fmt.Errorf("не корректный id")
+		return errors.New("некорректный id")
 	}
 	return nil
 }

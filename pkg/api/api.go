@@ -1,8 +1,9 @@
 package api
 
 import (
-	"go1f/pkg/database"
 	"net/http"
+
+	"go1f/pkg/database"
 )
 
 func Init() {

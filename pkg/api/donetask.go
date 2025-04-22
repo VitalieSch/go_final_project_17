@@ -2,9 +2,10 @@ package api
 
 import (
 	"encoding/json"
-	"go1f/pkg/database"
 	"net/http"
 	"time"
+
+	"go1f/pkg/database"
 )
 
 // Обработчик выполненной задачи, для POST запроса

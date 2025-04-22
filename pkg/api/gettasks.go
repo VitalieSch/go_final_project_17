@@ -2,8 +2,9 @@ package api
 
 import (
 	"encoding/json"
-	"go1f/pkg/database"
 	"net/http"
+
+	"go1f/pkg/database"
 )
 
 // Обработчик для получения списка задач
