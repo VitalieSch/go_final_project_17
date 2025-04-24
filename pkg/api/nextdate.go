@@ -1,4 +1,4 @@
-package database
+package api
 
 import (
 	"errors"
@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 )
-
-const DateFmt = "20060102"
 
 // Вычисляем следующую дату выполнения задачи
 func NextDate(now time.Time, date string, repeat string) (string, error) {

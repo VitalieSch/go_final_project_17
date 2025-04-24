@@ -56,7 +56,7 @@ func AddTaskHandler(w http.ResponseWriter, r *http.Request) {
 	} else if t.Before(now) && task.Repeat == "" {
 		task.Date = now.Format(DateFmt)
 	} else if t.Before(now) {
-		nextDate, err := database.NextDate(now, task.Date, task.Repeat)
+		nextDate, err := NextDate(now, task.Date, task.Repeat)
 		if err != nil {
 			http.Error(w, `{"error":"неверный формат двты"}`, http.StatusBadRequest)
 			return
@@ -154,7 +154,7 @@ func PutUpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	} else if t.Before(now) && task.Repeat == "" {
 		task.Date = now.Format(DateFmt)
 	} else if t.Before(now) {
-		task.Date, err = database.NextDate(now, task.Date, task.Repeat)
+		task.Date, err = NextDate(now, task.Date, task.Repeat)
 		if err != nil {
 			http.Error(w, `{"error":"неверный формат двты"}`, http.StatusBadRequest)
 			return
